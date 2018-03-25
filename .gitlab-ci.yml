@@ -1,0 +1,53 @@
+stages:
+  - test
+  - build
+  - dist
+
+
+cache:
+  untracked: false
+  key: pip-cache
+  paths:
+    - ~/.cache/pip
+
+
+variables:
+  PY_PACKAGE: "ohol"
+
+
+py.test-3.5:
+  stage: test
+  image: python:3.5-alpine
+  script:
+    - pip install -r requirements_dev.txt
+    - py.test --cov $PY_PACKAGE test
+
+
+py.test-3.6:
+  stage: test
+  image: python:3.6-alpine
+  script:
+    - pip install -r requirements_dev.txt
+    - py.test --cov $PY_PACKAGE test
+
+
+pylint:
+  stage: test
+  image: python:3.6-alpine
+  script:
+    - pip install -r requirements_dev.txt
+    - pylint --errors-only $PY_PACKAGE
+
+
+dist:
+  stage: build
+  image: python:3.6-alpine
+  script:
+    - pip install -e .
+    - python setup.py sdist
+    - echo $CI_COMMIT_SHA > git_commit
+  artifacts:
+    name: "${PY_PACKAGE}-${CI_COMMIT_SHA}"
+    paths:
+     - dist/*.tar.gz
+     - git_commit
