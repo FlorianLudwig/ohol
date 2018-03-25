@@ -20,7 +20,7 @@ py.test-3.5:
   image: python:3.5-alpine
   script:
     - pip install -r requirements_dev.txt
-    - py.test --cov $PY_PACKAGE test
+    - py.test --cov $PY_PACKAGE tests
 
 
 py.test-3.6:
@@ -28,7 +28,7 @@ py.test-3.6:
   image: python:3.6-alpine
   script:
     - pip install -r requirements_dev.txt
-    - py.test --cov $PY_PACKAGE test
+    - py.test --cov $PY_PACKAGE tests
 
 
 pylint:
