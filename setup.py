@@ -20,6 +20,7 @@ setup_requirements = [
 
 test_requirements = [
     'pytest',
+    'pylint',
 ]
 
 setup(
