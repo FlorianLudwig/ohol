@@ -1,28 +1,32 @@
 import asyncio
 import zlib
 
-def parse_ints(data):
+
+def parse_ints(data) -> list:
+    """parse space separated ascii ints"""
     return map(int, data.strip().split(b' '))
 
 
-def make_stream(data):
+def make_stream(data) -> asyncio.StreamReader:
+    """create asyncio.StreamReader from static data"""
     stream = asyncio.StreamReader()
     stream._buffer = bytearray(data)
     return stream
 
 
-async def read_compressed_message(stream):
+async def read_compressed_message(stream: asyncio.StreamReader) -> bytes:
     """used by MC and CM"""
     chunk = await stream.readuntil(b'\n')
     binary_raw_size, binary_compressed_size = parse_ints(chunk)
     chunk = await stream.read(1 + binary_compressed_size)
-    assert chunk[0] == 35 # 35 = #
+    assert chunk[0] == 35  # chr(35) == '#'
     data = zlib.decompress(chunk[1:])
     assert len(data) == binary_raw_size
     return data
 
 
-async def parse_command(stream):
+async def parse_command(stream: asyncio.StreamReader):
+    """read and parse one server message from stream"""
     command = await stream.read(3)
     if command == b'MC\n':
         chunk = await stream.readuntil(b'\n')
@@ -64,6 +68,9 @@ class Client:
     def __init__(self, reader, writer):
         self.reader = reader
         self.writer = writer
+        self.current_players = 0
+        self.max_players = 0
+        self.sequence_no = -1
 
     @classmethod
     async def connect(cls, host, port=8005):

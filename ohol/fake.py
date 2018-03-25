@@ -1,5 +1,6 @@
 """this module contains captured data send from an official server
 to an official client."""
+# pylint: skip-file
 
 DATA = bytes([
 # char peer1_4[] = {
