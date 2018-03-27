@@ -10,7 +10,7 @@ def parse_ints(data) -> list:
 def make_stream(data) -> asyncio.StreamReader:
     """create asyncio.StreamReader from static data"""
     stream = asyncio.StreamReader()
-    stream._buffer = bytearray(data)
+    stream.feed_data(data)
     return stream
 
 
