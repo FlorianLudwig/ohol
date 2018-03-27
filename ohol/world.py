@@ -1,4 +1,5 @@
 """World/map data"""
+import zlib
 
 class Square:
     """One game square"""
@@ -7,7 +8,7 @@ class Square:
         self.floors = floors
         self.t = t
 
-    def __bytes__(self):
+    def __str__(self):
         """
         Format:
                             sscanf( tokens->getElementDirect(i),
@@ -16,12 +17,12 @@ class Square:
                                     &( mMapFloors[mapI] ),
                                     &( mMap[mapI] ) );
                                     """
-        return b'{} {} {}'.format(self.biom, self.floors, self.t)
+        return '{} {} {}'.format(self.biom, self.floors, self.t)
 
 
 class Tile:
-    """One map tile, containing .size_x by size_y `ohol.world.Square`s"""
     def __init__(self, x, y, data=None):
+        """One map tile, containing .size_x by size_y `ohol.world.Square`s"""
         self.size_x = 32
         self.size_y = 30
         self.x = x
@@ -29,7 +30,7 @@ class Tile:
         self._data = data if data else []
         while len(self._data) < self.size_x * self.size_y:
             self._data.append(Square())
-        self._cache_dirty = False
+        self._cache_dirty = True
         self._cache = b''
 
     def __getitem__(self, pos):
@@ -43,13 +44,14 @@ class Tile:
         compressed = zlib.compress(ascii_data)
         binary_raw_size = len(ascii_data)
         binary_compressed_size = len(compressed)
-        chunk = b'MC\n{} {} {} {}\n{} {}\n#\n'
-        chunk = chunk.format(self.size_x, self.size_y, self.x, self.y,
+        header = 'MC\n{} {} {} {}\n{} {}\n#'
+        header = header.format(self.size_x, self.size_y, self.x, self.y,
                              binary_raw_size, binary_compressed_size)
-        self._cache = chunk + compressed
+        self._cache = header.encode('ascii') + compressed
 
     def ascii(self):
-        pass
+        data = ' '.join(str(square) for square in self._data)
+        return data.encode('ascii')
 
     def __bytes__(self):
         if self._cache_dirty:

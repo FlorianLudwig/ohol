@@ -11,6 +11,7 @@ import ohol.client
 def main(args=None):
     """Console script for ohol."""
     host = '167.114.233.197'
+    # host = 'server14.onehouronelife.com'
     port = 8005
 
     loop = asyncio.get_event_loop()
