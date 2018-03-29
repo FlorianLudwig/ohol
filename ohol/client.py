@@ -1,6 +1,7 @@
 import asyncio
 import zlib
 
+from ohol import server_protocol
 
 class Client:
     def __init__(self, reader, writer):
@@ -34,8 +35,19 @@ class Client:
         print('result', result)
         return result == b'ACCEPTED\n#'
 
+    async def login(self, user, key):
+        # TODO implement proper login
+        login = b'LOGIN#'
+        self.writer.write(login)
+        result = await self.reader.readuntil(b'\n#')
+        print('result', result)
+        return result == b'ACCEPTED\n#'
+
     async def process_server_messages(self):
-        parser = ProtocolParser(self.reader)
+        while True:
+            cmd = await server_protocol.parse_command(self.reader)
+            print(cmd)
+            yield cmd
 
     def send_cmd(self, command):
         if isinstance(command, str):
@@ -48,6 +60,9 @@ class Client:
         grid square, including picking something up (if there's no bare-handed
         action), and picking up a container."""
         self.send_cmd('USE {} {}#\n'.format(x, y))
+
+    def move(self, x, y):
+        self.send_cmd('MOVE {} {}#\n'.format(x, y))
 
     def baby(self, x, y):
         self.send_cmd('BABY {} {}#\n'.format(x, y))
