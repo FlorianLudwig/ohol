@@ -69,6 +69,11 @@ async def parse_command(stream: asyncio.StreamReader):
         food_change = await stream.readuntil(b'\n#')
         return (b'FX', food_change[:2])
 
+    if command == b'NM\n':
+        names = await stream.readuntil(b'\n#')
+        names = names.split(b'\n')
+        return (b'NM', names)
+
     raise AttributeError('parse error. unknown command {}'.format(command))
 
 
