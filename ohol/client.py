@@ -20,13 +20,25 @@ class Client:
 
     async def read_connection_header(self):
         header = await self.reader.readuntil(b'\n#')
-        print(header.split(b'\n'))
-        prefix, player_status, sequence_no, suffix = header.split(b'\n')
+        header = header.split(b'\n')
+        if header[0] == b'SERVER_FULL':
+            prefix, player_status, suffix = header
+            version = -1
+            sequence_no = -1
+        elif header[0] == b'SN':
+            if len(header) == 4:
+                prefix, player_status, sequence_no, suffix = header
+                version = -1
+            else:
+                prefix, player_status, sequence_no, version, suffix = header
+        else:
+            raise NotImplementedError('unknown header ' + repr(header[0]))
         assert prefix == b'SN'
         current_players, max_players = player_status.split(b'/')
         self.current_players = int(current_players)
         self.max_players = int(max_players)
         self.sequence_no = int(sequence_no)
+        self.server_version = version
 
     async def login(self, login):
         # TODO implement proper login
